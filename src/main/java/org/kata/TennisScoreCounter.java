@@ -2,8 +2,8 @@ package org.kata;
 
 public class TennisScoreCounter {
 
-    private int scoreA = 0;
-    private int scoreB = 0;
+    private Score scoreA = Score.LOVE;
+    private Score scoreB = Score.LOVE;
     private boolean isAdvantageA = false;
     private boolean isAdvantageB = false;
 
@@ -22,7 +22,7 @@ public class TennisScoreCounter {
             if (!isGameWon()) {
                 printScore();
             } else {
-                System.out.println("Player " + (isAdvantageA || scoreA > scoreB ? "A" : "B") + " wins the game");
+                System.out.println("Player " + (isAdvantageA || scoreA == Score.WIN ? "A" : "B") + " wins the game");
                 return;
             }
         }
@@ -32,13 +32,13 @@ public class TennisScoreCounter {
      * Updates the score when Player A wins a point, handling advantage and deuce states.
      */
     private void playerAWinsPoint() {
-        if ((scoreA == 40 && scoreB == 40) && !isAdvantageA) { // Deuce scenario
+        if ((scoreA == Score.FORTY && scoreB == Score.FORTY) && !isAdvantageA) { // Deuce scenario
             isAdvantageA = !isAdvantageB;
             isAdvantageB = false;
-        } else if (isAdvantageA || (scoreA == 40 && !isAdvantageB)) { // Winning after advantage || No Deuce happens
-            scoreA = 50; // Arbitrary winning score
+        } else if (isAdvantageA || (scoreA == Score.FORTY && !isAdvantageB)) { // Winning after advantage || No Deuce happens
+            scoreA = Score.WIN;
         } else {
-            scoreA = nextScore(scoreA);
+            scoreA = scoreA.next();
         }
     }
 
@@ -46,32 +46,22 @@ public class TennisScoreCounter {
      * Updates the score when Player B wins a point, handling advantage and deuce states.
      */
     private void playerBWinsPoint() {
-        if ((scoreA == 40 && scoreB == 40) && !isAdvantageB) { // Deuce scenario
+        if ((scoreA == Score.FORTY && scoreB == Score.FORTY) && !isAdvantageB) { // Deuce scenario
             isAdvantageB = !isAdvantageA;
             isAdvantageA = false;
-        } else if (isAdvantageB || (scoreB ==40 && !isAdvantageA)) { // Winning after advantage || No Deuce happens
-            scoreB = 50;
+        } else if (isAdvantageB || (scoreB == Score.FORTY && !isAdvantageA)) { // Winning after advantage || No Deuce happens
+            scoreB = Score.WIN;
         } else {
-            scoreB = nextScore(scoreB);
+            scoreB = scoreB.next();
         }
-    }
-
-    /**
-     * Determines the next score for a player.
-     * @param score The current score.
-     * @return The updated score.
-     */
-    private int nextScore(int score) {
-        if (score < 30) return score + 15;
-        else return 40;
     }
 
     /**
      * Prints the current scores, showing "Adv" for players with advantage.
      */
     private void printScore() {
-        String scoreAString = isAdvantageA ? "Adv" : (scoreA == 0 ? "0" : scoreA == 50 ? "Win" : Integer.toString(scoreA));
-        String scoreBString = isAdvantageB ? "Adv" : (scoreB == 0 ? "0" : scoreB == 50 ? "Win" : Integer.toString(scoreB));
+        String scoreAString = isAdvantageA ? "Adv" : scoreA.getLabel();
+        String scoreBString = isAdvantageB ? "Adv" : scoreB.getLabel();
         System.out.println("Player A: " + scoreAString + " / Player B: " + scoreBString);
     }
 
@@ -80,7 +70,7 @@ public class TennisScoreCounter {
      * @return True if either player has won, false otherwise.
      */
     private boolean isGameWon() {
-        return (scoreA == 50 || scoreB == 50);
+        return (scoreA == Score.WIN || scoreB == Score.WIN);
     }
 
     public static void main(String[] args) {
